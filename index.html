@@ -246,9 +246,10 @@
   function hexToRgb(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
   var base=hexToRgb('BBB08C'),lift=hexToRgb('DBD3B8'),acc=hexToRgb('EE5A28');
   function mix(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
-  function size(){var r=canvas.getBoundingClientRect();W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);cols=Math.ceil(W/(cell+gap))+1;rows=Math.ceil(H/(cell+gap))+1;}
-  size();window.addEventListener('resize',size);
+  function size(){var r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);cols=Math.ceil(W/(cell+gap))+1;rows=Math.ceil(H/(cell+gap))+1;}
   var hero=document.getElementById('top');
+  size();
+  if(window.ResizeObserver){ new ResizeObserver(size).observe(hero); } else { window.addEventListener('resize',size); }
   hero.addEventListener('mousemove',function(e){var r=canvas.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;});
   hero.addEventListener('mouseleave',function(){mouse.x=-9999;mouse.y=-9999;});
   hero.addEventListener('click',function(e){var r=canvas.getBoundingClientRect();ripples.push({x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()});});
