@@ -82,15 +82,6 @@
   .mfig{margin:0;height:clamp(230px,44vh,470px);flex:0 0 auto}
   .mfig img{height:100%;width:auto;display:block;object-fit:cover;border:1px solid rgba(232,225,207,.14)}
   @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .weekly{padding:clamp(90px,15vh,170px) 0}
-  .weekly h2{font-size:clamp(36px,7.4vw,100px);line-height:.9;max-width:12ch}
-  .weekly h2 em{font-style:normal;color:var(--accent)}
-  .fmt{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px}
-  .fmt span{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:rgba(31,27,22,.6);position:relative;padding-left:16px}
-  .fmt span::before{content:"";position:absolute;left:0;top:50%;width:6px;height:6px;background:var(--accent);transform:translateY(-50%)}
-  .weekly .cta{display:inline-flex;align-items:center;gap:10px;margin-top:38px;font-family:var(--f-mono);font-size:14px;letter-spacing:.08em;border-bottom:2px solid var(--accent);padding-bottom:4px}
-  .weekly .cta .arw{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-  .weekly .cta:hover .arw{transform:translate(4px,-4px)}
 
   .info{padding:clamp(80px,14vh,160px) 0}
   .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px 40px}
@@ -135,8 +126,8 @@
   .thelist .hair{width:88px;height:2px;background:var(--accent);transform:scaleX(.001);transform-origin:left;transition:transform .8s cubic-bezier(.16,1,.3,1)}
   .thelist.in .hair{transform:scaleX(1)}
   .thelist .k{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(232,225,207,.5);margin:14px 0 26px}
-  .thelist h2{font-size:clamp(30px,6vw,72px);line-height:.9;text-transform:none;letter-spacing:.01em;margin:0;max-width:16ch}
-  .thelist h2 .ln{display:block;overflow:hidden}
+  .thelist h2{font-size:clamp(30px,6vw,72px);line-height:.9;text-transform:uppercase;letter-spacing:.01em;margin:0;max-width:16ch}
+  .thelist h2 .ln{display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
   .thelist h2 .ln b{display:block;font-weight:inherit;transform:translateY(106%);transition:transform .95s cubic-bezier(.16,1,.3,1)}
   .thelist.in h2 .ln:nth-child(1) b{transform:none;transition-delay:.04s}
   .thelist.in h2 .ln:nth-child(2) b{transform:none;transition-delay:.12s}
@@ -154,6 +145,10 @@
   .thelist .send:disabled{opacity:.45;cursor:default}
   .thelist .msg{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--accent);margin:14px 0 0;min-height:1.2em;line-height:1.45}
   .thelist .fine{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:rgba(232,225,207,.5);margin:22px 0 0;line-height:1.9}
+  .thelist .cta{display:inline-flex;align-items:center;gap:10px;margin-top:38px;font-family:var(--f-mono);font-size:14px;letter-spacing:.08em;color:var(--paper);border-bottom:2px solid var(--accent);padding-bottom:4px}
+  .thelist .cta .arw{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .thelist .cta:hover{color:var(--accent)}
+  .thelist .cta:hover .arw{transform:translate(4px,-4px)}
   .thelist .done{display:none}
   .thelist.is-done form{display:none}
   .thelist.is-done .done{display:block}
@@ -215,25 +210,17 @@
   </div>
 </section>
 
-<section class="weekly">
-  <div class="wrap">
-    <h2 class="an reveal">The list changes <em>every Thursday.</em></h2>
-    <div class="fmt reveal"><span>Sets</span><span>By the roll</span><span>Sashimi</span></div>
-    <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener" class="cta reveal" data-hover><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span>@sidepiecehandrolls</span> <span class="arw">&#8599;</span></a>
-  </div>
-</section>
-
 <section class="thelist" id="thelist">
   <div class="wrap">
     <div class="hair" aria-hidden="true"></div>
-    <p class="k">The list</p>
+    <p class="k">The Thursday list</p>
 
-    <h2 class="an reveal">
-      <span class="ln"><b>The list goes out</b></span>
-      <span class="ln"><b>Thursday <em>morning</em>.</b></span>
+    <h2 class="an reveal" aria-label="Don't show up guessing.">
+      <span class="ln"><b>Don't show up</b></span>
+      <span class="ln"><b>guessing<em>.</em></b></span>
     </h2>
 
-    <p class="note reveal">Sets, rolls and sashimi for that night, sent the morning of. Nothing else.</p>
+    <p class="note reveal">The board changes every week. Get it in your inbox Thursday morning, before the first roll goes out.</p>
 
     <!-- target="_blank" is the no-JS fallback: if the script fails the form
          still submits rather than dead-ending. Keep it. -->
@@ -242,15 +229,15 @@
       <label class="flabel" for="tl-email">Email</label>
       <div class="fwell" id="tl-well">
         <input id="tl-email" type="email" name="fields[email]"
-               placeholder="name@email.com" autocomplete="email"
+               placeholder="you@email.com" autocomplete="email"
                inputmode="email" spellcheck="false" required>
       </div>
       <!-- MailerLite rejects the post without both of these -->
       <input type="hidden" name="ml-submit" value="1">
       <input type="hidden" name="anticsrf" value="true">
-      <button type="submit" class="send">Subscribe</button>
+      <button type="submit" class="send">Get the list &#8594;</button>
       <p class="msg" id="tl-msg" role="alert"></p>
-      <p class="fine">One email a week. Unsubscribe at any time.</p>
+      <p class="fine">One email a week. Unsubscribe whenever.*<br>*No hard feelings.</p>
     </form>
 
     <!-- Copy below matches double opt-in ON in MailerLite. Saying "Added" would be
@@ -260,6 +247,8 @@
       <p class="dlabel an">Almost.</p>
       <p class="dnote">A confirmation email just went out. The link inside finishes it.</p>
     </div>
+
+    <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener" class="cta reveal" data-hover><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span>@sidepiecehandrolls</span> <span class="arw">&#8599;</span></a>
   </div>
 </section>
 
@@ -377,13 +366,27 @@
       well.classList.add('bad'); msg.textContent="That address isn't valid."; input.focus(); return;
     }
     msg.textContent=''; send.disabled=true; send.textContent='Sending';
-    fetch(form.action, { method:'POST', mode:'no-cors', body:new FormData(form) })
-      .then(function(){ sect.classList.add('is-done'); })
+    fetch(form.action, { method:'POST', body:new FormData(form) })
+      .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+      .then(function(res){
+        if(res.ok && res.data && res.data.success){ sect.classList.add('is-done'); return; }
+        send.disabled=false; send.textContent='Get the list →';
+        well.classList.add('bad');
+        msg.textContent = mlError(res.data) || 'That did not go through. Try again in a moment.';
+      })
       .catch(function(){
-        send.disabled=false; send.textContent='Subscribe';
+        send.disabled=false; send.textContent='Get the list →';
         msg.textContent='That did not go through. Try again in a moment.';
       });
   });
+
+  function mlError(data){
+    try{
+      var fields=data.errors.fields;
+      for(var k in fields){ if(fields[k] && fields[k][0]) return fields[k][0]; }
+    }catch(e){}
+    return null;
+  }
 })();
 </script>
 </body>
