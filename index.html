@@ -491,12 +491,13 @@ document.querySelectorAll('[data-roll]').forEach(function(el){
     }
     msg.textContent=''; send.disabled=true; send.textContent='Sending';
     /* Post through our own relay first (join.sidepiecesc.com) so tracker blockers leave it alone.
-       If the relay can't be reached, try MailerLite directly. If both fail, the browser blocked it. */
+       If the relay can't be reached or errors, try MailerLite directly. If both fail, the browser blocked it. */
     function post(url){
       return fetch(url, { method:'POST', body:new FormData(form) })
         .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); });
     }
     post(JOIN_URL)
+      .then(function(res){ if(!res.ok) throw new Error('relay'); return res; })
       .catch(function(){ return post(form.action); })
       .then(function(res){
         if(res.ok && res.data && res.data.success){ sect.classList.add('is-done'); return; }
