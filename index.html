@@ -129,7 +129,8 @@
   .thelist .fwell::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease)}
   .thelist .fwell:focus-within::after,.thelist .fwell.bad::after{transform:scaleX(1)}
   .thelist .send{margin-top:28px;display:inline-flex;align-items:center;gap:12px;background:var(--ink);color:var(--paper);border:0;cursor:pointer;font-family:var(--f-body);font-size:16px;font-weight:600;letter-spacing:.02em;padding:18px 30px;transition:background .3s var(--ease),color .3s}
-  .thelist .send:hover:not(:disabled){background:var(--accent);color:var(--ink)}
+  @media (hover:hover){ .thelist .send:hover:not(:disabled){background:var(--accent);color:var(--ink)} }
+  .thelist .msg a{color:inherit;text-decoration:underline;text-underline-offset:3px}
   .thelist .send:disabled{opacity:.5;cursor:default}
   .thelist .msg{font-size:14px;font-weight:500;color:#8A2A0C;margin:14px 0 0;min-height:1.3em}
   .thelist .fine{font-size:14px;color:rgba(31,27,22,.75);margin:18px 0 0;line-height:1.6}
@@ -474,6 +475,7 @@ document.querySelectorAll('[data-roll]').forEach(function(el){
 (function(){
   var sect=document.getElementById('thelist');
   if(!sect) return;
+  var JOIN_URL='https://join.sidepiecesc.com/subscribe';
   var form=sect.querySelector('form'), well=document.getElementById('tl-well'),
       input=document.getElementById('tl-email'), msg=document.getElementById('tl-msg'),
       send=form.querySelector('.send');
@@ -488,19 +490,30 @@ document.querySelectorAll('[data-roll]').forEach(function(el){
       well.classList.add('bad'); msg.textContent="That address isn't valid."; input.focus(); return;
     }
     msg.textContent=''; send.disabled=true; send.textContent='Sending';
-    fetch(form.action, { method:'POST', body:new FormData(form) })
-      .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); })
+    /* Post through our own relay first (join.sidepiecesc.com) so tracker blockers leave it alone.
+       If the relay can't be reached, try MailerLite directly. If both fail, the browser blocked it. */
+    function post(url){
+      return fetch(url, { method:'POST', body:new FormData(form) })
+        .then(function(r){ return r.json().then(function(data){ return {ok:r.ok, data:data}; }); });
+    }
+    post(JOIN_URL)
+      .catch(function(){ return post(form.action); })
       .then(function(res){
         if(res.ok && res.data && res.data.success){ sect.classList.add('is-done'); return; }
-        send.disabled=false; send.textContent='Subscribe';
+        reset();
         well.classList.add('bad');
         msg.textContent = mlError(res.data) || 'That did not go through. Try again in a moment.';
       })
       .catch(function(){
-        send.disabled=false; send.textContent='Subscribe';
-        msg.textContent='That did not go through. Try again in a moment.';
+        reset();
+        msg.textContent='Your browser blocked the signup. Turn off private browsing or ad blocking and try again, or DM us ';
+        var ig=document.createElement('a');
+        ig.href='https://instagram.com/sidepiecehandrolls'; ig.target='_blank'; ig.rel='noopener'; ig.textContent='@sidepiecehandrolls';
+        msg.appendChild(ig); msg.appendChild(document.createTextNode('.'));
       });
   });
+
+  function reset(){ send.disabled=false; send.textContent='Subscribe'; }
 
   function mlError(data){
     try{
