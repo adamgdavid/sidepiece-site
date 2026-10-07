@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sidepiece — made-to-order hand roll bar</title>
 <meta name="description" content="Sidepiece is a made-to-order hand roll bar at Madson Wines in Santa Cruz. Thursdays and Fridays, 5 PM till sold out.">
-<script>document.documentElement.classList.add('js')</script>
+<script>
+(function(h){h.classList.add('js');
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  h.classList.add('m');
+  try{if(sessionStorage.getItem('sp-intro'))h.classList.add('seen');}catch(e){}
+  /* failsafe: if the motion libraries never arrive, show the page as-is */
+  setTimeout(function(){if(!h.classList.contains('ready'))h.classList.remove('m');},4500);
+})(document.documentElement)</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600&family=Cinzel:wght@600;700&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
@@ -21,7 +29,11 @@
   FIRST VIEWPORT: Left, khaki field: slogan at max size bottom-left, kanji column full
     height against the seam. Right, the red-nails photo at full height. When and where
     under the slogan.
-  MOTION: One grammar. Photos lift in like a curtain, type lines rise. Nothing reacts to the cursor.
+  MOTION (after new-sushism.jp): smooth inertial scroll; type rises letter by letter from
+    behind a mask with a slight tilt and replays on the way back up; photos open like a
+    curtain and drift at different depths; the sourced photo opens from a window to full
+    bleed as you scroll; film grain over everything; links roll on hover. Short logo intro,
+    once per visit.
   */
   :root{
     --ground:#CFC5A6;--ground-deep:#BBB08C;--paper:#E8E1CF;
@@ -53,8 +65,8 @@
   .hero{--kj:min(11.4svh,7.4vw);position:relative;display:grid;grid-template-columns:1fr min(calc(100svh * .667),48vw);min-height:100svh;min-height:max(100svh,620px)}
   .hero-copy{container-type:inline-size;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:120px calc(var(--kj) + var(--gut) + 28px) clamp(32px,6svh,72px) var(--gut)}
   .slogan{font-size:min(calc(100cqi / 4.25),210px);margin:0 0 clamp(22px,3.6svh,40px)}
-  .rise .ln{display:block;overflow:hidden;padding-top:.04em}
-  .rise .ln b{display:block;font-weight:400}
+  .ln{display:block;overflow:hidden;padding-top:.04em}
+  .ln b{display:block;font-weight:400}
   .hero-meta{display:flex;flex-wrap:wrap;gap:6px 28px;font-size:clamp(15px,1.15vw,18px);font-weight:500}
   .hero-meta a{border-bottom:1.5px solid var(--accent);padding-bottom:2px;transition:color .25s}
   .hero-meta a:hover{color:var(--accent)}
@@ -137,41 +149,53 @@
   footer .meta{font-size:14px;color:rgba(232,225,207,.62);text-align:right;line-height:1.8}
   footer .fk{font-family:var(--f-jp);font-weight:900;font-size:18px;letter-spacing:.3em;color:var(--paper)}
 
-  /* ---------- motion: curtain + rise, only when JS is running ---------- */
-  .js .lift{clip-path:inset(100% 0 0 0);transition:clip-path 1.4s var(--ease)}
-  .js .lift img{transform:scale(1.12);transition:transform 1.8s var(--ease)}
-  .js .lift.in{clip-path:inset(0 0 0 0)}
-  .js .lift.in img{transform:none}
-  .js .rise .ln b{transform:translateY(105%);transition:transform 1.05s var(--ease)}
-  .js .rise.in .ln b{transform:none}
-  .js .rise.in .ln:nth-child(2) b{transition-delay:.08s}
-  .js .rise.in .ln:nth-child(3) b{transition-delay:.16s}
-  .js .fade{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform 1s var(--ease)}
-  .js .fade.in{opacity:1;transform:none}
-  .js .hero .fade.in{transition-delay:.45s}
-  .js .kanji.fade.in{transition-delay:.6s}
-  @media (prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}
-    .js .lift,.js .lift img,.js .rise .ln b,.js .fade{clip-path:none!important;transform:none!important;opacity:1!important;transition:none!important}
+  /* ---------- motion (GSAP). Hidden states exist only while .m is on and init hasn't run ---------- */
+  .m:not(.ready) nav,.m:not(.ready) .hero-copy > *,.m:not(.ready) .hero-photo,
+  .m:not(.ready) [data-split],.m:not(.ready) .lift,.m:not(.ready) .fade{visibility:hidden}
+  .cm{display:inline-block;overflow:hidden;vertical-align:top;padding:.1em 0 .06em;margin:-.1em 0 -.06em}
+  .w{display:inline-block;white-space:nowrap}
+  .c{display:inline-block;transform-origin:0 100%;will-change:transform}
+  .kanji .cm,.splash .sk .cm{padding:0 .1em;margin:0 -.1em}
+
+  .splash{display:none}
+  .m .splash{display:flex;position:fixed;inset:0;z-index:300;background:var(--ink);color:var(--paper);align-items:center;justify-content:center;gap:clamp(20px,3vw,44px)}
+  .m.seen .splash{display:none}
+  .splash .sw{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+  .splash .wm{font-family:var(--f-word);font-weight:600;letter-spacing:.2em;font-size:clamp(30px,4.4vw,60px);line-height:1}
+  .splash .rl{height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left}
+  .splash .sk{writing-mode:vertical-rl;font-family:var(--f-jp);font-weight:900;font-size:clamp(18px,2.4vw,32px);line-height:1.02}
+
+  .grain{display:none}
+  @media (min-width:900px){
+    .m .grain{display:block;position:fixed;inset:-60px;z-index:250;pointer-events:none;opacity:.13;mix-blend-mode:overlay;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") repeat;animation:grain .9s steps(5) infinite}
   }
+  @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-18px,12px)}40%{transform:translate(14px,-22px)}60%{transform:translate(-10px,26px)}80%{transform:translate(24px,8px)}100%{transform:translate(0,0)}}
+
+  .roll{display:inline-block;overflow:hidden;vertical-align:bottom;height:1.3em;line-height:1.3}
+  .roll .r{display:inline-block;white-space:pre;text-shadow:0 1.3em 0 currentColor;transition:transform .6s var(--ease);transition-delay:calc(var(--i) * 14ms)}
+  @media (hover:hover){ a:hover .roll .r{transform:translateY(-1.3em)} }
+  html.lenis{scroll-behavior:auto}
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 </style>
 </head>
 <body>
+<div class="splash" aria-hidden="true"><div class="sw"><span class="wm">SIDEPIECE</span><span class="rl"></span></div><span class="sk" lang="ja">&#33031;&#24441;&#25163;&#24059;&#23551;&#21496;</span></div>
+<div class="grain" aria-hidden="true"></div>
 
 <nav>
   <a class="brand" href="#top">SIDEPIECE</a>
-  <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener" class="ig" aria-label="Sidepiece on Instagram"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span>@sidepiecehandrolls</span></a>
+  <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener" class="ig" aria-label="Sidepiece on Instagram"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span data-roll>@sidepiecehandrolls</span></a>
 </nav>
 
 <header class="hero" id="top">
   <div class="hero-copy">
-    <span class="kanji fade" lang="ja" aria-hidden="true">&#33031;&#24441;&#25163;&#24059;&#23551;&#21496;</span>
-    <h1 class="slogan an rise" aria-label="Nori waits for no one.">
+    <span class="kanji" lang="ja" aria-hidden="true">&#33031;&#24441;&#25163;&#24059;&#23551;&#21496;</span>
+    <h1 class="slogan an" aria-label="Nori waits for no one.">
       <span class="ln"><b>Nori</b></span>
       <span class="ln"><b>waits for</b></span>
       <span class="ln"><b>no one<em>.</em></b></span>
     </h1>
-    <p class="hero-meta fade"><span>Made-to-order hand roll bar</span><a href="#visit">Thurs &amp; Fri, 5 PM till sold out</a></p>
+    <p class="hero-meta"><span>Made-to-order hand roll bar</span><a href="#visit"><span data-roll>Thurs &amp; Fri, 5 PM till sold out</span></a></p>
   </div>
   <figure class="hero-photo lift">
     <img src="img/hero-1280.jpg" srcset="img/hero-800.jpg 800w, img/hero-1280.jpg 1280w" sizes="(min-width:900px) 45vw, 100vw" width="1280" height="1920" fetchpriority="high" alt="Two hands with red nails and silver rings resting on a whole tuna">
@@ -179,17 +203,17 @@
 </header>
 
 <section class="showcase" id="showcase">
-  <h2 class="an rise" aria-label="One at a time."><span class="ln"><b>One at</b></span><span class="ln"><b>a time<em>.</em></b></span></h2>
+  <h2 class="an" data-split aria-label="One at a time."><span class="ln"><b>One at</b></span><span class="ln"><b>a time<em>.</em></b></span></h2>
   <div class="spread">
     <figure class="f-hands lift"><img src="img/hands-1280.jpg" srcset="img/hands-800.jpg 800w, img/hands-1280.jpg 1280w" sizes="(min-width:721px) 58vw, 100vw" width="1280" height="1920" loading="lazy" alt="Two hands holding a cluster of assorted hand rolls in sunlight"></figure>
     <figure class="f-crab lift"><img src="img/crab-1280.jpg" srcset="img/crab-800.jpg 800w, img/crab-1280.jpg 1280w" sizes="(min-width:721px) 33vw, 75vw" width="1280" height="1920" loading="lazy" alt="Crab and chive hand roll held up to the camera"></figure>
     <figure class="f-avo lift"><img src="img/avocado-1280.jpg" srcset="img/avocado-800.jpg 800w, img/avocado-1280.jpg 1280w" sizes="(min-width:721px) 33vw, 75vw" width="1280" height="1920" loading="lazy" alt="Charred avocado hand roll with furikake and sesame"></figure>
-    <p class="line an fade">Crisp nori. Warm rice. Eaten the second <em>it's made.</em></p>
+    <p class="line an" data-split>Crisp nori. Warm rice. Eaten the second <em>it's made.</em></p>
   </div>
 </section>
 
 <section class="thelist" id="thelist">
-  <h2 class="an rise" aria-label="Don't show up guessing.">
+  <h2 class="an" data-split aria-label="Don't show up guessing.">
     <span class="ln"><b>Don't show up</b></span>
     <span class="ln"><b>guessing<em>.</em></b></span>
   </h2>
@@ -226,49 +250,198 @@
 
 <section class="sourced">
   <figure class="lift"><img src="img/loin-1280.jpg" srcset="img/loin-800.jpg 800w, img/loin-1280.jpg 1280w" sizes="100vw" width="1280" height="1920" loading="lazy" alt="Sliced tuna loin glistening in sunlight"></figure>
-  <h2 class="an fade">Sourced from the Central Coast &amp; <em>Monterey Bay.</em></h2>
+  <h2 class="an" data-split>Sourced from the Central Coast &amp; <em>Monterey Bay.</em></h2>
 </section>
 
 <section class="visit" id="visit">
-  <div class="fade">
-    <p class="v an">Thurs &amp; Fri<br>5 PM till<br>sold out</p>
-    <p class="sub">Walk up. We roll until the fish runs out.</p>
+  <div>
+    <p class="v an" data-split>Thurs &amp; Fri<br>5 PM till<br>sold out</p>
+    <p class="sub fade">Walk up. We roll until the fish runs out.</p>
   </div>
-  <div class="fade">
-    <p class="v an">Madson Wines</p>
-    <p class="sub"><a href="https://www.google.com/maps/search/?api=1&amp;query=328+Ingalls+St+Ste+G+Santa+Cruz+CA+95060" target="_blank" rel="noopener">328 Ingalls St, Ste G, Santa Cruz <span class="arw">&#8599;</span></a></p>
+  <div>
+    <p class="v an" data-split>Madson Wines</p>
+    <p class="sub fade"><a href="https://www.google.com/maps/search/?api=1&amp;query=328+Ingalls+St+Ste+G+Santa+Cruz+CA+95060" target="_blank" rel="noopener"><span data-roll>328 Ingalls St, Ste G, Santa Cruz</span> <span class="arw">&#8599;</span></a></p>
   </div>
 </section>
 
 <footer id="follow">
-  <div class="big" aria-hidden="true">SIDEPIECE</div>
-  <div class="frow">
+  <div class="big" data-split aria-hidden="true">SIDEPIECE</div>
+  <div class="frow fade">
     <div class="links">
-      <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>@sidepiecehandrolls</a>
-      <a href="https://instagram.com/chef.addam" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>@chef.addam</a>
-      <a href="https://instagram.com/chefjeffreywall" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>@chefjeffreywall</a>
+      <a href="https://instagram.com/sidepiecehandrolls" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span data-roll>@sidepiecehandrolls</span></a>
+      <a href="https://instagram.com/chef.addam" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span data-roll>@chef.addam</span></a>
+      <a href="https://instagram.com/chefjeffreywall" target="_blank" rel="noopener"><svg class="igico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span data-roll>@chefjeffreywall</span></a>
     </div>
     <div class="meta"><span class="fk" lang="ja">&#33031;&#24441;&#25163;&#24059;&#23551;&#21496;</span><br>sidepiecesc.com</div>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
 <script>
+/* link roll on hover: pure CSS once the text is split, so it runs with or without GSAP */
+document.querySelectorAll('[data-roll]').forEach(function(el){
+  var t=el.textContent; el.textContent=''; el.classList.add('roll');
+  Array.from(t).forEach(function(ch,i){
+    var r=document.createElement('span'); r.className='r'; r.style.setProperty('--i',i); r.textContent=ch; el.appendChild(r);
+  });
+});
+
 (function(){
-  /* hero plays on load; everything else when it scrolls in */
-  var hero=document.querySelectorAll('.hero .rise, .hero .lift, .hero .fade');
-  function play(){ hero.forEach(function(el){ el.classList.add('in'); }); }
-  if(document.readyState==='complete') requestAnimationFrame(play);
-  else window.addEventListener('load',function(){ requestAnimationFrame(play); });
-  setTimeout(play,900);
+  var h=document.documentElement;
+  if(!h.classList.contains('m')) return;
+  if(!window.gsap || !window.ScrollTrigger || !window.Lenis){ h.classList.remove('m'); return; }
 
-  var els=[].slice.call(document.querySelectorAll('.rise, .lift, .fade')).filter(function(el){ return !el.closest('.hero'); });
-  if(!('IntersectionObserver' in window)){ els.forEach(function(el){ el.classList.add('in'); }); return; }
-  var io=new IntersectionObserver(function(en){
-    en.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  },{threshold:0.12, rootMargin:'0px 0px -6% 0px'});
-  els.forEach(function(el){ io.observe(el); });
+  var fontsReady=Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(function(r){ setTimeout(r,1500); })]);
+  fontsReady.then(function(){
+    try{ init(); }catch(err){ h.classList.remove('m'); h.classList.add('ready'); if(window.console) console.error(err); }
+  });
+
+  /* Wrap every character in <span class="c">, optionally inside its own mask <span class="cm">.
+     Words are kept whole so lines still break between words. Nested <em> survives. */
+  function split(root, mask){
+    var out=[];
+    (function walk(node){
+      Array.from(node.childNodes).forEach(function(n){
+        if(n.nodeType===3){
+          var frag=document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(function(part){
+            if(!part) return;
+            if(/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(' ')); return; }
+            var w=document.createElement('span'); w.className='w';
+            Array.from(part).forEach(function(ch){
+              var c=document.createElement('span'); c.className='c'; c.textContent=ch; out.push(c);
+              if(mask){ var m=document.createElement('span'); m.className='cm'; m.appendChild(c); w.appendChild(m); }
+              else w.appendChild(c);
+            });
+            frag.appendChild(w);
+          });
+          n.parentNode.replaceChild(frag,n);
+        } else if(n.nodeType===1 && n.tagName!=='BR'){ walk(n); }
+      });
+    })(root);
+    return out;
+  }
+
+  function init(){
+    gsap.registerPlugin(ScrollTrigger);
+    var EO='expo.out', EIO='expo.inOut';
+    var mobile=matchMedia('(max-width:899px)').matches;
+
+    /* smooth, inertial scroll driven by GSAP's ticker so ScrollTrigger stays in sync */
+    var lenis=new Lenis({lerp:.085, wheelMultiplier:.9});
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+    gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener('click',function(e){
+        var t=document.querySelector(a.getAttribute('href'));
+        if(t){ e.preventDefault(); lenis.scrollTo(t,{duration:1.6, easing:function(x){ return x===1?1:1-Math.pow(2,-10*x); }}); }
+      });
+    });
+
+    var HIDE={yPercent:118, rotate:7};
+    var SHOW={yPercent:0, rotate:0};
+
+    /* ---------- hero ---------- */
+    var nav=document.querySelector('nav');
+    var photo=document.querySelector('.hero-photo'), photoImg=photo.querySelector('img');
+    var meta=document.querySelector('.hero-meta');
+    var lines=Array.from(document.querySelectorAll('.slogan .ln b')).map(function(b){ return split(b,false); });
+    var kj=split(document.querySelector('.hero .kanji'),true);
+    gsap.set(lines.flat(),Object.assign({},HIDE));
+    gsap.set(kj,{yPercent:110, rotate:14});
+    gsap.set(photo,{clipPath:'inset(100% 0% 0% 0%)'});
+    gsap.set(photoImg,{scale:1.32, transformOrigin:'50% 40%'});
+    gsap.set(meta,{autoAlpha:0, y:16});
+    gsap.set(nav,{autoAlpha:0, y:-14});
+
+    var hero=gsap.timeline({paused:true});
+    hero.to(photo,{clipPath:'inset(0% 0% 0% 0%)', duration:1.5, ease:EIO},0)
+        .to(photoImg,{scale:1.06, duration:2.4, ease:EO},.15);
+    lines.forEach(function(chs,i){ hero.to(chs,Object.assign({duration:1.05, ease:EO, stagger:.032},SHOW),.5+i*.13); });
+    hero.to(kj,{yPercent:0, rotate:0, duration:.95, ease:EO, stagger:.07},.75)
+        .to(meta,{autoAlpha:1, y:0, duration:1, ease:EO},1.15)
+        .to(nav,{autoAlpha:1, y:0, duration:.9, ease:'power2.out'},1.2);
+
+    /* the hero photo keeps drifting slowly as you scroll away */
+    gsap.to(photoImg,{yPercent:8, ease:'none', scrollTrigger:{trigger:'.hero', start:'top top', end:'bottom top', scrub:true}});
+
+    /* ---------- intro, once per visit ---------- */
+    var splash=document.querySelector('.splash');
+    if(splash && !h.classList.contains('seen') && getComputedStyle(splash).display!=='none'){
+      lenis.stop();
+      var wm=split(splash.querySelector('.wm'),true), sk=split(splash.querySelector('.sk'),true);
+      gsap.set(wm,{yPercent:118, rotate:7}); gsap.set(sk,{yPercent:110, rotate:14});
+      gsap.set(splash,{clipPath:'inset(0% 0% 0% 0%)'});
+      gsap.timeline({delay:.15, onComplete:function(){
+          try{ sessionStorage.setItem('sp-intro','1'); }catch(e){}
+          splash.remove(); lenis.start();
+        }})
+        .to(wm,{yPercent:0, rotate:0, duration:.9, ease:EO, stagger:.045},0)
+        .to('.splash .rl',{scaleX:1, duration:.9, ease:EIO},.25)
+        .to(sk,{yPercent:0, rotate:0, duration:.85, ease:EO, stagger:.05},.35)
+        .to(wm.concat(sk),{yPercent:-118, duration:.6, ease:'power3.in', stagger:.012},'+=.35')
+        .to(splash,{clipPath:'inset(0% 0% 100% 0%)', duration:1.05, ease:EIO},'-=.15')
+        .add(function(){ hero.play(); },'<.2');
+    } else {
+      if(splash) splash.remove();
+      hero.play();
+    }
+
+    /* ---------- headlines: letters rise on the way in, sink on the way back up ---------- */
+    document.querySelectorAll('[data-split]').forEach(function(el){
+      var lns=el.querySelectorAll('.ln b'), chs=[];
+      if(lns.length) lns.forEach(function(b){ chs=chs.concat(split(b,false)); });
+      else chs=split(el,true);
+      gsap.set(chs,HIDE);
+      var each=Math.min(.03, .9/chs.length);
+      ScrollTrigger.create({
+        trigger:el, start:'top 88%',
+        onEnter:function(){ gsap.to(chs,Object.assign({duration:1, ease:EO, stagger:each, overwrite:true},SHOW)); },
+        onLeaveBack:function(){ gsap.to(chs,Object.assign({duration:.55, ease:'power2.in', stagger:each/2, overwrite:true},HIDE)); }
+      });
+    });
+
+    /* ---------- photos: curtain open, then parallax inside the frame ---------- */
+    document.querySelectorAll('.lift').forEach(function(fig){
+      if(fig.closest('.hero') || fig.closest('.sourced')) return;
+      var img=fig.querySelector('img');
+      gsap.set(fig,{clipPath:'inset(100% 0% 0% 0%)'});
+      gsap.set(img,{scale:1.3});
+      ScrollTrigger.create({trigger:fig, start:'top 90%', once:true, onEnter:function(){
+        gsap.to(fig,{clipPath:'inset(0% 0% 0% 0%)', duration:1.5, ease:EIO});
+        gsap.to(img,{scale:1.14, duration:2.2, ease:EO});
+      }});
+      gsap.fromTo(img,{yPercent:-6},{yPercent:6, ease:'none', scrollTrigger:{trigger:fig, start:'top bottom', end:'bottom top', scrub:true}});
+    });
+
+    /* the spread floats at different depths */
+    [['.f-hands',0],['.f-crab',mobile?-40:-140],['.f-avo',mobile?-20:-60],['.spread .line',mobile?-20:-90]].forEach(function(d){
+      if(!d[1]) return;
+      gsap.to(d[0],{y:d[1], ease:'none', scrollTrigger:{trigger:'.spread', start:'top bottom', end:'bottom top', scrub:true}});
+    });
+    gsap.fromTo('.showcase h2',{xPercent:0},{xPercent:mobile?-4:-8, ease:'none', scrollTrigger:{trigger:'.showcase', start:'top bottom', end:'bottom top', scrub:true}});
+
+    /* ---------- sourced: the photo opens from a window to full bleed ---------- */
+    var sFig=document.querySelector('.sourced figure'), sImg=sFig.querySelector('img');
+    gsap.fromTo(sFig,{clipPath:mobile?'inset(14% 10% 14% 10%)':'inset(18% 24% 18% 24%)'},
+      {clipPath:'inset(0% 0% 0% 0%)', ease:'none', scrollTrigger:{trigger:'.sourced', start:'top 90%', end:'top top', scrub:.8}});
+    gsap.fromTo(sImg,{scale:1.4},{scale:1.05, ease:'none', scrollTrigger:{trigger:'.sourced', start:'top bottom', end:'bottom top', scrub:.8}});
+
+    /* ---------- supporting copy ---------- */
+    document.querySelectorAll('.fade').forEach(function(el){
+      gsap.set(el,{autoAlpha:0, y:28});
+      ScrollTrigger.create({trigger:el, start:'top 92%', once:true, onEnter:function(){ gsap.to(el,{autoAlpha:1, y:0, duration:1.1, ease:EO, delay:.15}); }});
+    });
+
+    h.classList.add('ready');
+    window.addEventListener('load',function(){ ScrollTrigger.refresh(); });
+  }
 })();
-
+</script>
+<script>
 (function(){
   var sect=document.getElementById('thelist');
   if(!sect) return;
